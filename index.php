@@ -16,6 +16,8 @@
 <body>
     <div class="container-fluid">
         <h1>Timetables</h1>
+        <div class="row">
+        <div class="col-md-3">
         <form method="GET">
             <div class="form-group">
                 <label for="evaNo">EvaNo:</label>
@@ -45,6 +47,27 @@
             <br><br>
             <button type="submit" class="btn btn-primary">Get Timetable</button>
         </form>
+        </div>
+        <div class="col-md-9">
+            <table class="table">
+              <tbody>
+                <tr>
+                  <td>EvaNo:</td>
+                  <td><?php echo "test"; ?></td>
+                </tr>
+                <tr>
+                  <td>Name:</td>
+                  <td><?php echo "test"; ?></td>
+                </tr>
+                <tr>
+                  <td>Bundesland:</td>
+                  <td><?php echo "test"; ?></td>
+                </tr>
+              </tbody>
+            </table>        
+        </div>
+        </div>
+
         <br>
         <div id="timetable-results"><br>
         <?php
