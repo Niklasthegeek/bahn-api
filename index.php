@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Timetables</title>
+    <title>Bahn-Infotafel</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap CSS -->
@@ -16,7 +16,7 @@
 </head>
 <body>
     <div class="container-fluid">
-        <h1>Timetables</h1>
+        <h1>Bahn-Infotafel</h1>
         <div class="row">
         <div class="col-md-3">
         <form method="GET">
@@ -72,7 +72,7 @@
         <br>
         <div id="timetable-results"><br>
         <?php
-
+        if (isset($_GET['evaNo']) && isset($_GET['date']) && isset($_GET['hour'])) {
         ?>
 
         <table class="table table-bordered">
@@ -85,12 +85,12 @@
               <th>Zugnummer</th>
               <th>ZugID</th>
               <th>Über</th>
-              <th>filter</th>
             </tr>
           </thead>
           <tbody>
             <?php foreach ($data as $row) { ?>
-              <tr>
+              <tr <?php if ($row['filter'] == "F") { ?>style="background-color: #ffcccc;"<?php } elseif ($row['filter'] == "N") { ?>style="background-color: #e6ffe6;"<?php } elseif ($row['filter'] == "S") { ?>style="background-color: #ccebff;"<?php }
+              ?>>
                 <td><?php echo $row['time']; ?> Uhr</td>
                 <td><?php echo $row['gleis']; ?></td>
                 <td><?php echo $row['bhf_0']; ?></td>
@@ -98,12 +98,12 @@
                 <td><?php echo $row['category']; ?></td>
                 <td><?php echo $row['linie']; ?></td>
                 <td><?php echo $row['pfad']; ?></td>
-                <td><?php echo $row['filter']; ?></td>
               </tr>
             <?php } ?>
           </tbody>
         </table>
         <?php
+        }
         ?>
     </div>
 </body>
