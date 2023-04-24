@@ -1,4 +1,7 @@
-<?php require 'backend.php'; ?>
+<?php 
+//Backend laden
+require 'backend.php';
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -53,16 +56,16 @@
             <table class="table">
               <tbody>
                 <tr>
-                  <td>EvaNo:</td>
-                  <td><?php echo "test"; ?></td>
+                  <td>StationNumber:</td>
+                  <td><?php echo getStationDetails($evaNo, 'result.0.number' ); ?></td>
                 </tr>
                 <tr>
                   <td>Name:</td>
-                  <td><?php echo "test"; ?></td>
+                  <td><?php echo getStationDetails($evaNo, 'result.0.name' ); ?></td>
                 </tr>
                 <tr>
-                  <td>Bundesland:</td>
-                  <td><?php echo "test"; ?></td>
+                  <td>Aufgabenträger:</td>
+                  <td><?php echo getStationDetails($evaNo, 'result.0.aufgabentraeger.name' ); ?></td>
                 </tr>
               </tbody>
             </table>        

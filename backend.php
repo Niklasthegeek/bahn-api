@@ -29,6 +29,21 @@ function curlbahn($url, $accept_header) {
     curl_close($curl);
     return $response;
 }
+#function getStationDetails($evaNo, $json){
+#    $url = "https://apis.deutschebahn.com/db-api-marketplace/apis/station-data/v2/stations?eva=" . $evaNo;
+#    $data = json_decode(curlbahn($url, "application/json"), true);
+#    $stationNumber = $data[$json];
+#    return $stationNumber;
+#}
+function getStationDetails($evaNo, $json) {
+    $url = "https://apis.deutschebahn.com/db-api-marketplace/apis/station-data/v2/stations?eva=" . $evaNo;
+    $data = json_decode(curlbahn($url, "application/json"), true);
+    $stationDetail = array_reduce(explode('.', $json), function($arr, $key) {
+        return $arr[$key] ?? null;
+    }, $data);
+    return $stationDetail;
+}
+
 #$url = "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1/plan/8010224/230424/15";
 #echo curlbahn($url,"application/xml");
 
