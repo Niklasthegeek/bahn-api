@@ -57,15 +57,15 @@ require 'backend.php';
               <tbody>
                 <tr>
                   <td>StationNumber:</td>
-                  <td><?php echo getStationDetails($evaNo, 'result.0.number' ); ?></td>
+                  <td><?php echo isset($evaNo) ? getStationDetails($evaNo, 'result.0.number') : ''; ?></td>
                 </tr>
                 <tr>
                   <td>Name:</td>
-                  <td><?php echo getStationDetails($evaNo, 'result.0.name' ); ?></td>
+                  <td><?php echo isset($evaNo) ? getStationDetails($evaNo, 'result.0.name') : ''; ?></td>
                 </tr>
                 <tr>
                   <td>Aufgabenträger:</td>
-                  <td><?php echo getStationDetails($evaNo, 'result.0.aufgabentraeger.name' ); ?></td>
+                  <td><?php echo isset($evaNo) ? getStationDetails($evaNo, 'result.0.aufgabentraeger.name') : ''; ?></td>
                 </tr>
               </tbody>
             </table>        
@@ -75,7 +75,25 @@ require 'backend.php';
         <br>
         <div id="timetable-results"><br>
         <?php
-        if (isset($_GET['evaNo']) && isset($_GET['date']) && isset($_GET['hour'])) {
+        
+        if (isset($_GET['evaNo']) && isset($_GET['date']) && isset($_GET['hour'])&& isset($_GET['mode'])) {
+            //Lese Werte aus dem Form
+            $evaNo = filter_input(INPUT_GET, 'evaNo', FILTER_VALIDATE_INT);
+            #$date = filter_input(INPUT_GET, 'date', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{4}-\d{2}-\d{2}$/")));
+            #$hour = filter_input(INPUT_GET, 'hour', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{2}:\d{2}$/")));
+            $mode = isset($_GET['mode']) && ($_GET['mode'] === 'ar' || $_GET['mode'] === 'dp') ? $_GET['mode'] : 'ar';
+            #$evaNo = $_GET['evaNo'];
+            $date = $_GET['date'];
+            $hour = $_GET['hour'];
+            #$mode = $_GET['mode'];
+            //Auswahl der Tabellenüberschrift
+            if ($mode == "ar") {
+                $th_1 = "Startbahnhof";
+                $th_2 = "Letzter Halt";
+            } else {
+                $th_1 = "Nächster Halt";
+                $th_2 = "Zielbahnhof";
+            }
         ?>
 
         <table class="table table-bordered">
@@ -91,7 +109,7 @@ require 'backend.php';
             </tr>
           </thead>
           <tbody>
-            <?php foreach ($data as $row) { ?>
+            <?php foreach (getTimeTable($evaNo, $date, $hour, $mode) as $row) { ?>
               <tr <?php if ($row['filter'] == "F") { ?>style="background-color: #ffcccc;"<?php } elseif ($row['filter'] == "N") { ?>style="background-color: #e6ffe6;"<?php } elseif ($row['filter'] == "S") { ?>style="background-color: #ccebff;"<?php }
               ?>>
                 <td><?php echo $row['time']; ?> Uhr</td>
@@ -110,5 +128,4 @@ require 'backend.php';
         ?>
     </div>
 </body>
-
 </html>
