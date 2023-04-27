@@ -26,17 +26,17 @@ require 'backend.php';
             <div class="form-group">
                 <label for="evaNo">EvaNo:</label>
                 <input type="text" class="form-control" id="evaNo" name="evaNo" value="<?php echo isset($_GET['evaNo']) ? $_GET['evaNo'] : ''; ?>"
-                    placeholder="Enter EvaNo">
+                    placeholder="Enter EvaNo" required>
             </div>
             <div class="form-group">
                 <label for="date">Datum:</label>
                 <input type="date" class="form-control" id="date" name="date"
-                    value="<?php echo isset($_GET['date']) ? $_GET['date'] : ''; ?>">
+                    value="<?php echo isset($_GET['date']) ? $_GET['date'] : ''; ?>" required>
             </div>
             <div class="form-group">
                 <label for="hour">Stunde:</label>
                 <input type="text" class="form-control" id="hour" name="hour"
-                    value="<?php echo isset($_GET['hour']) ? $_GET['hour'] : ''; ?>">
+                    value="<?php echo isset($_GET['hour']) ? $_GET['hour'] : ''; ?>" required>
             </div>
             <div class="form-check-inline">
                 <input type="radio" class="form-check-input" id="mode-ar" name="mode" value="ar" <?php if (isset($_GET['mode'])){if ($_GET['mode'] == 'ar')
@@ -47,6 +47,24 @@ require 'backend.php';
                 <input type="radio" class="form-check-input" id="mode-dp" name="mode" value="dp" <?php if (isset($_GET['mode'])){if ($_GET['mode'] == 'dp')
                     echo "checked";}; ?>>
                 <label class="form-check-label" for="mode-dp">Abfahrten</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="zugart_fv" name="zugart_fv" value="F">
+              <label class="form-check-label" for="zugart_fv">
+                Fernverkehr
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="zugart_fv" name="zugart_nv" value="N">
+              <label class="form-check-label" for="zugart_nv">
+                Nahverkehr
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="zugart_fv" name="zugart_metro" value="M">
+              <label class="form-check-label" for="zugart_metro">
+                Metro
+              </label>
             </div>
             <br><br>
             <button type="submit" class="btn btn-primary">Get Timetable</button>
