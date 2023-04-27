@@ -30,7 +30,7 @@ require 'backend.php';
             </div>
             <div class="form-group">
                 <label for="date">Datum:</label>
-                <input type="text" class="form-control" id="date" name="date"
+                <input type="date" class="form-control" id="date" name="date"
                     value="<?php echo isset($_GET['date']) ? $_GET['date'] : ''; ?>">
             </div>
             <div class="form-group">

@@ -42,6 +42,14 @@ function curlbahn($url, $accept_header) {
  * @param mixed $json
  * @return mixed
  */
+
+function getYMD($date){
+    $date_obj = DateTime::createFromFormat('Y-m-d', $date); // Erstellt ein DateTime-Objekt aus dem String
+    $new_date_str = $date_obj->format('ymd'); // Formatiert das DateTime-Objekt in das gewünschte Format
+    return $new_date_str;
+}
+
+
 function getStationDetails($evaNo, $json) {
     $url = "https://apis.deutschebahn.com/db-api-marketplace/apis/station-data/v2/stations?eva=" . $evaNo;
     $data = json_decode(curlbahn($url, "application/json"), true);
@@ -70,7 +78,8 @@ if (isset($_GET['evaNo']) && isset($_GET['date']) && isset($_GET['hour']) && iss
  * @return array
  */
 function getTimeTable($evaNo, $date, $hour, $mode){
-$url = "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1/plan/" . $evaNo . "/" . $date . "/" . $hour;
+$dateNew = getYMD($date);     
+$url = "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1/plan/" . $evaNo . "/" . $dateNew . "/" . $hour;
 // XML-String in ein SimpleXMLElement-Objekt umwandeln
 $xml = new SimpleXMLElement(curlbahn($url,"application/xml"));
 // Erstelle ein leeres Array, um die Daten zu speichern
