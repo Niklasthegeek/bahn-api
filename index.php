@@ -31,8 +31,9 @@ require 'backend.php';
             <div class="form-group">
                 <label for="date">Datum:</label>
                 <input type="date" class="form-control" id="date" name="date"
-                    value="<?php echo isset($_GET['date']) ? $_GET['date'] : ''; ?>" required>
+                       value="<?php echo isset($_GET['date']) ? $_GET['date'] : date('Y-m-d'); ?>" required>
             </div>
+
             <div class="form-group">
                 <label for="hour">Stunde:</label>
                 <input type="text" class="form-control" id="hour" name="hour"
@@ -48,23 +49,30 @@ require 'backend.php';
                     echo "checked";}; ?>>
                 <label class="form-check-label" for="mode-dp">Abfahrten</label>
             </div>
+            <br><br>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="zugart_fv" name="zugart_fv" value="F">
-              <label class="form-check-label" for="zugart_fv">
-                Fernverkehr
-              </label>
+              <input class="form-check-input" type="checkbox" id="zugart_fv" name="zugart_fv" value="yes" <?php if (isset($_GET['zugart_fv'])){if ($_GET['zugart_fv'] == 'yes'){echo "checked";}}  ?>>
+                <label class="form-check-label" for="zugart_fv">
+                    Fernverkehr
+                </label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="zugart_fv" name="zugart_nv" value="N">
-              <label class="form-check-label" for="zugart_nv">
-                Nahverkehr
-              </label>
+              <input class="form-check-input" type="checkbox" id="zugart_nv" name="zugart_nv" value="yes" <?php if (isset($_GET['zugart_nv'])){if ($_GET['zugart_nv'] == 'yes'){echo "checked";}}  ?>>
+                <label class="form-check-label" for="zugart_nv">
+                    Nahverkehr
+                </label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="zugart_fv" name="zugart_metro" value="M">
-              <label class="form-check-label" for="zugart_metro">
-                Metro
-              </label>
+              <input class="form-check-input" type="checkbox" id="zugart_metro" name="zugart_metro" value="yes" <?php if (isset($_GET['zugart_metro'])){if ($_GET['zugart_metro'] == 'yes'){echo "checked";}}  ?>>
+                <label class="form-check-label" for="zugart_metro">
+                    Metro
+                </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="zugart_andere" name="zugart_andere" value="yes" <?php if (isset($_GET['zugart_andere'])){if ($_GET['zugart_andere'] == 'yes'){echo "checked";}}  ?>>
+                <label class="form-check-label" for="zugart_andere">
+                    Andere
+                </label>
             </div>
             <br><br>
             <button type="submit" class="btn btn-primary">Get Timetable</button>
@@ -97,11 +105,11 @@ require 'backend.php';
         if (isset($_GET['evaNo']) && isset($_GET['date']) && isset($_GET['hour'])&& isset($_GET['mode'])) {
             //Lese Werte aus dem Form
             $evaNo = filter_input(INPUT_GET, 'evaNo', FILTER_VALIDATE_INT);
-            #$date = filter_input(INPUT_GET, 'date', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{4}-\d{2}-\d{2}$/")));
+            $date = filter_input(INPUT_GET, 'date', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{4}-\d{2}-\d{2}$/")));
             #$hour = filter_input(INPUT_GET, 'hour', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{2}:\d{2}$/")));
             $mode = isset($_GET['mode']) && ($_GET['mode'] === 'ar' || $_GET['mode'] === 'dp') ? $_GET['mode'] : 'ar';
             #$evaNo = $_GET['evaNo'];
-            $date = $_GET['date'];
+            #$date = $_GET['date'];
             $hour = $_GET['hour'];
             #$mode = $_GET['mode'];
             //Auswahl der Tabellenüberschrift
@@ -114,7 +122,7 @@ require 'backend.php';
             }
         ?>
 
-        <table class="table table-bordered">
+        <table class="table table-sm table-bordered">
           <thead>
             <tr>
               <th>Zeit</th>
