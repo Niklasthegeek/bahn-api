@@ -62,15 +62,39 @@ function getStationDetails($evaNo, $json) {
     }, $data);
     return $stationDetail;
 }
-if (isset($_GET['evaNo']) && isset($_GET['date']) && isset($_GET['hour']) && isset($_GET['mode'])) {
-    //Lese Werte aus dem Form
-    $evaNo = filter_input(INPUT_GET, 'evaNo', FILTER_VALIDATE_INT);
-    $date = filter_input(INPUT_GET, 'date', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{4}-\d{2}-\d{2}$/")));
-    $hour = filter_input(INPUT_GET, 'hour', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{2}:\d{2}$/")));
-    $mode = isset($_GET['mode']) && ($_GET['mode'] === 'ar' || $_GET['mode'] === 'dp') ? $_GET['mode'] : 'ar';
+function checkElevatorState($evaNo, $gleisnummer) {
+    $gleisnummer_bereinigt =intval($gleisnummer);
+    $facilities= json_decode(getFaSta($evaNo), true);
+    foreach($facilities['facilities'] as $facility) {
+        $description = $facility['description'];
+        $state = $facility['state'];
+        if($facility['type'] === 'ELEVATOR') {
+            if(strpos($description, 'Gleis ' . $gleisnummer_bereinigt) !== false && $state === 'ACTIVE') {
+                return true;
+            }
+            else if(strpos($description, 'Gleis ' . ($gleisnummer_bereinigt-1) . '/' . $gleisnummer_bereinigt) !== false && $state === 'ACTIVE') {
+                return true;
+            }
+        }
+    }
+    return false;
 }
+#if (isset($_GET['evaNo']) && isset($_GET['date']) && isset($_GET['hour']) && isset($_GET['mode'])) {
+#    //Lese Werte aus dem Form
+#    $evaNo = filter_input(INPUT_GET, 'evaNo', FILTER_VALIDATE_INT);
+#    $date = filter_input(INPUT_GET, 'date', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{4}-\d{2}-\d{2}$/")));
+#    $hour = filter_input(INPUT_GET, 'hour', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{2}:\d{2}$/")));
+#    $mode = isset($_GET['mode']) && ($_GET['mode'] === 'ar' || $_GET['mode'] === 'dp') ? $_GET['mode'] : 'ar';
+#}
 
+function getFaSta($evaNo) {
+    $stationnumber = getStationDetails($evaNo, 'result.0.number');
+    $url = "https://apis.deutschebahn.com/db-api-marketplace/apis/fasta/v2/stations/" . $stationnumber;
+    $data = json_decode(curlbahn($url, "application/json"), true);
+    $data = curlbahn($url, "application/json");
 
+    return $data;
+}
 
 function getTimeTable($evaNo, $date, $hour, $mode){
 $dateNew = getYMD($date);     
@@ -106,12 +130,18 @@ foreach ($xml->s as $element) { // Schleife, die jedes Element in $xml->s durchl
         } else {
             $zugn = $element->tl->attributes()->n; // Weist der Variablen $zugn den Wert des Attributs "n" des Attributs "tl" des aktuellen Elements zu
         }
+        if(checkElevatorState($evaNo, $gleis)){
+            $elevator = "TRUE";
+        } elseif (!checkElevatorState($evaNo, $gleis)) {
+            $elevator = "FALSE";
+        }
         // Filtert die Einträge weiter nach gegebenen Kriterien
         if($ff==$view1 or $ff==$view2 or $ff==$view3 or $ff==$view4){
             //Array mit Daten befüllen
             $data[] = [
                 'time' => $time,
                 'gleis' => $gleis,
+                'elevator' => $elevator,
                 'bhf_0' => $bhf_0,
                 'bhf_end' => $bhf_end,
                 'category' => $category . $zugn,

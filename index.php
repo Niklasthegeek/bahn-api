@@ -127,6 +127,7 @@ require 'backend.php';
             <tr>
               <th>Zeit</th>
               <th>Gleis</th>
+              <th>Aufzug</th>
               <th><?php echo $th_1; ?></th>
               <th><?php echo $th_2; ?></th>
               <th>Zugnummer</th>
@@ -140,6 +141,7 @@ require 'backend.php';
               ?>>
                 <td><?php echo $row['time']; ?> Uhr</td>
                 <td><?php echo $row['gleis']; ?></td>
+                <td><?php echo $row['elevator']; ?></td>
                 <td><?php echo $row['bhf_0']; ?></td>
                 <td><?php echo $row['bhf_end']; ?></td>
                 <td><?php echo $row['category']; ?></td>
