@@ -10,12 +10,23 @@ require 'backend.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Bootstrap CSS bootstrap-dark -->
+    <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1/dist/css/bootstrap-dark.min.css" rel="stylesheet" /> -->
     <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- Popper JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="module">
+      import Autocomplete from "./autocomplete.min.js";
+      const opts = {
+        //onSelectItem: console.log,
+        maximumItems: "10",
+        fullWidth: true	
+      };
+      new Autocomplete(document.getElementById("bahnhof"), opts);
+    </script>
 </head>
 <body>
     <div class="container-fluid">
@@ -23,18 +34,33 @@ require 'backend.php';
         <div class="row">
         <div class="col-md-3">
         <form method="GET">
-            <div class="form-group">
-                <label for="evaNo">EvaNo:</label>
-                <input type="text" class="form-control" id="evaNo" name="evaNo" value="<?php echo isset($_GET['evaNo']) ? $_GET['evaNo'] : ''; ?>"
-                    placeholder="Enter EvaNo" required>
+            <div class="form-group col-12">
+                <label for="bahnhof">Bahnhof:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="bahnhof"
+                  name="bahnhof"
+                  value="<?php echo isset($_GET['bahnhof']) ? $_GET['bahnhof'] : ''; ?>"
+                  data-server="searchStation.php"
+                  data-live-server="true"
+                  data-value-field="evaNo"
+                  data-label-field="name"
+                  data-fetch-options='{"headers": {"X-My-Header": "test"}}'
+                  data-server-params='{"related":"related_field"}'
+                  placeholder="Type something"
+                  required
+                />
+                <!--<input type="text" class="form-control" id="evaNo" name="evaNo" value="<?php echo isset($_GET['evaNo']) ? $_GET['evaNo'] : ''; ?>"
+                    placeholder="Enter EvaNo" required>-->
             </div>
-            <div class="form-group">
+            <div class="form-group col-12">
                 <label for="date">Datum:</label>
                 <input type="date" class="form-control" id="date" name="date"
                        value="<?php echo isset($_GET['date']) ? $_GET['date'] : date('Y-m-d'); ?>" required>
             </div>
 
-            <div class="form-group">
+            <div class="form-group col-12">
                 <label for="hour">Stunde:</label>
                 <input type="text" class="form-control" id="hour" name="hour"
                     value="<?php echo isset($_GET['hour']) ? $_GET['hour'] : ''; ?>" required>
@@ -78,15 +104,17 @@ require 'backend.php';
             <button type="submit" class="btn btn-primary">Get Timetable</button>
         </form>
         </div>
+        <div class="col-md-9">
         <?php
         
-        if (isset($_GET['evaNo']) && isset($_GET['date']) && isset($_GET['hour'])&& isset($_GET['mode'])) {
+        if (isset($_GET['bahnhof']) && isset($_GET['date']) && isset($_GET['hour'])&& isset($_GET['mode'])) {
             //Lese Werte aus dem Form
-            $evaNo = filter_input(INPUT_GET, 'evaNo', FILTER_VALIDATE_INT);
+            #$evaNo = filter_input(INPUT_GET, 'evaNo', FILTER_VALIDATE_INT);
             $date = filter_input(INPUT_GET, 'date', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{4}-\d{2}-\d{2}$/")));
             #$hour = filter_input(INPUT_GET, 'hour', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{2}:\d{2}$/")));
             $mode = isset($_GET['mode']) && ($_GET['mode'] === 'ar' || $_GET['mode'] === 'dp') ? $_GET['mode'] : 'ar';
-            #$evaNo = $_GET['evaNo'];
+            
+            $evaNo = (searchStation($_GET['bahnhof']))==[] ?  null : json_decode(searchStation($_GET['bahnhof']), true)[0]['evaNo'];
             #$date = $_GET['date'];
             $hour = $_GET['hour'];
             #$mode = $_GET['mode'];
@@ -104,15 +132,16 @@ require 'backend.php';
               <tbody>
                 <tr>
                   <td>StationNumber:</td>
-                  <td><?php echo isset($evaNo) ? getStationDetails($evaNo, 'result.0.number') : ''; ?></td>
+                  <td><?php //Wenn evaNo gesetzt und getStationDetails($evaNo, 'result.0.name') nicht leer ist gebe getStationDetails($evaNo, 'result.0.name') aus, sonst gebe 'Information nicht verfügbar' aus
+                  echo isset($evaNo)&&!empty(getStationDetails($evaNo, 'result.0.number')) ? getStationDetails($evaNo, 'result.0.number') : 'Information nicht verfügbar';?>
                 </tr>
                 <tr>
                   <td>Name:</td>
-                  <td><?php echo isset($evaNo) ? getStationDetails($evaNo, 'result.0.name') : ''; ?></td>
+                  <td><?php echo isset($evaNo)&&!empty(getStationDetails($evaNo, 'result.0.name')) ? getStationDetails($evaNo, 'result.0.name') : 'Information nicht verfügbar'; ?></td>
                 </tr>
                 <tr>
                   <td>Aufgabenträger:</td>
-                  <td><?php echo isset($evaNo) ? getStationDetails($evaNo, 'result.0.aufgabentraeger.name') : ''; ?></td>
+                  <td><?php echo isset($evaNo)&&!empty(getStationDetails($evaNo, 'result.0.aufgabentraeger.name')) ? getStationDetails($evaNo, 'result.0.aufgabentraeger.name') : 'Information nicht verfügbar'; ?></td>
                 </tr>
               </tbody>
             </table>        

@@ -1,8 +1,18 @@
 <?php
-function getFromCache($cacheDir, $cacheKey, $cacheExpiration) {
+function getFromCache($cacheKey, $cacheExpiration) {
     // Build cache file path from cache key
+    $cacheDir = "cache/";
     $cacheFile = $cacheDir . $cacheKey;
-
+    
+    $files = glob($cacheDir . "*");
+    // Loop through all files
+    foreach ($files as $file) {
+        // Check if file is older than cache expiration time
+        if (time() - filemtime($file) >= 604800) {
+            // Delete file
+            unlink($file);
+        }
+    }
     // If cache file exists and is not expired, return cached data
     if (file_exists($cacheFile) && time() - filemtime($cacheFile) < $cacheExpiration) {
         return file_get_contents($cacheFile);
@@ -12,8 +22,9 @@ function getFromCache($cacheDir, $cacheKey, $cacheExpiration) {
     return false;
 }
 
-function saveToCache($cacheDir, $cacheKey, $data) {
+function saveToCache($cacheKey, $data) {
     // Build cache file path from cache key
+    $cacheDir = "cache/";
     $cacheFile = $cacheDir . $cacheKey;
 
     // Save data to cache file
@@ -74,19 +85,18 @@ function getviewselect() {
 }
 
 function getStationDetails($evaNo, $json) {
-    $cacheDir = 'cache/';
     $cacheExpiration = 600;
     $url = "https://apis.deutschebahn.com/db-api-marketplace/apis/station-data/v2/stations?eva=" . $evaNo;
     // Build cache key from URL
     $cacheKey = "StaDa-". $evaNo;
     // Try to get data from cache
-    $cachedData = getFromCache($cacheDir, $cacheKey, $cacheExpiration);
+    $cachedData = getFromCache($cacheKey, $cacheExpiration);
 
     if ($cachedData !== false) {
         $cjson = $cachedData;
     } else {
         $cjson = curlbahn($url, "application/json");
-        saveToCache($cacheDir, $cacheKey, $cjson);
+        saveToCache($cacheKey, $cjson);
     }
     $data = json_decode($cjson, true);
     $stationDetail = array_reduce(explode('.', $json), function($arr, $key) {
@@ -96,7 +106,8 @@ function getStationDetails($evaNo, $json) {
 }
 function checkElevatorState($evaNo, $gleisnummer) {
     $gleisnummer_bereinigt =intval($gleisnummer);
-    $facilities= json_decode(getFaSta($evaNo), true);
+    $facilities = json_decode(getFaSta($evaNo), true);
+    if (!(getStationDetails($evaNo, 'errNo')) == '404'){
     foreach($facilities['facilities'] as $facility) {
         $description = $facility['description'];
         $state = $facility['state'];
@@ -108,7 +119,7 @@ function checkElevatorState($evaNo, $gleisnummer) {
                 return true;
             }
         }
-    }
+    }}
     return false;
 }
 #if (isset($_GET['evaNo']) && isset($_GET['date']) && isset($_GET['hour']) && isset($_GET['mode'])) {
@@ -120,7 +131,6 @@ function checkElevatorState($evaNo, $gleisnummer) {
 #}
 
 function getFaSta($evaNo) {
-    $cacheDir = 'cache/';
     $cacheExpiration = 600;
     $stationnumber = getStationDetails($evaNo, 'result.0.number');
     $url = "https://apis.deutschebahn.com/db-api-marketplace/apis/fasta/v2/stations/" . $stationnumber;
@@ -129,7 +139,7 @@ function getFaSta($evaNo) {
     $cacheKey = "FaSta-".$evaNo;
 
     // Try to get data from cache
-    $cachedData = getFromCache($cacheDir, $cacheKey, $cacheExpiration);
+    $cachedData = getFromCache($cacheKey, $cacheExpiration);
 
     if ($cachedData !== false) {
         // Return cached data if available
@@ -138,26 +148,73 @@ function getFaSta($evaNo) {
 
     // Otherwise, make API request and save response to cache
     $data = curlbahn($url, "application/json");
-    saveToCache($cacheDir, $cacheKey, $data);
+    saveToCache($cacheKey, $data);
 
     return $data;
 }
+function getStationList(){
+    $url = "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1/station/*";
+    //Caching
+    $cacheExpiration = 86400; // 1 Tag, da nicht zu erwarten ist, dass häufig neue Stations hinzu kommen
+    // Build cache key from URL
+    $cacheKey = "StationList";
+    // Try to get data from cache
+    $cachedData = getFromCache($cacheKey, $cacheExpiration); 
+    if ($cachedData !== false) {
+        $sourcexml = $cachedData;
+    } else {
+        $sourcexml = curlbahn($url,"application/xml");
+        saveToCache($cacheKey, $sourcexml);
+    }
+    // XML-String in ein SimpleXMLElement-Objekt umwandeln
+    $xml = new SimpleXMLElement($sourcexml);
+    // Erstelle ein leeres Array, um die Daten zu speichern
+    $data = [];
+    // Fülle das Array mit den Daten aus der Schleife
+    foreach ($xml->station as $element) { // Schleife, die jedes Element in $xml->s durchläuft
+        $name = $element->attributes()->name;
+        $evaNo = $element->attributes()->eva;
+         //Array mit Daten befüllen
+        $data[] = [
+            'name' =>  json_decode(json_encode($name), true),
+            'evaNo' => json_decode(json_encode($evaNo), true)
+        ];
+    } 
+        
+    return $data;
+}
+
+function searchStation($searchTerm) {
+    $stations = getStationList();
+    $filteredStations = array_filter($stations, function($station) use ($searchTerm) {
+        return strpos(strtolower($station['name'][0]), strtolower($searchTerm)) !== false;
+    });
+    $result = array();
+    foreach ($filteredStations as $station) {
+        $result[] = array(
+            'name' => $station['name'][0],
+            'evaNo' => $station['evaNo'][0]
+        );
+    }
+    return json_encode($result, JSON_UNESCAPED_UNICODE);
+}
+
+
 
 function getTimeTable($evaNo, $date, $hour, $mode){
     $dateNew = getYMD($date);     
     $url = "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1/plan/" . $evaNo . "/" . $dateNew . "/" . $hour;
     // Cacheing
-    $cacheDir = 'cache/';
     $cacheExpiration = 600;
     // Build cache key from URL
-    $cacheKey = "Timetable-". $evaNo;
+    $cacheKey = "Timetable-". $evaNo . "-" . $dateNew .  "-" . $hour;
     // Try to get data from cache
-    $cachedData = getFromCache($cacheDir, $cacheKey, $cacheExpiration); 
+    $cachedData = getFromCache($cacheKey, $cacheExpiration); 
     if ($cachedData !== false) {
         $sourcexml = $cachedData;
     } else {
         $sourcexml = curlbahn($url,"application/xml");
-        saveToCache($cacheDir, $cacheKey, $sourcexml);
+        saveToCache($cacheKey, $sourcexml);
     }
     foreach(getviewselect() as $views) {
         $view1 = $views[0];

@@ -1,2 +1,5 @@
 secrets.txt
 *.xml
+old_stuff/
+cache/
+*.ico
