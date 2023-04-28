@@ -137,8 +137,7 @@ require 'backend.php';
           </thead>
           <tbody>
             <?php foreach (getTimeTable($evaNo, $date, $hour, $mode) as $row) { ?>
-              <tr <?php if ($row['filter'] == "F") { ?>style="background-color: #ffcccc;"<?php } elseif ($row['filter'] == "N") { ?>style="background-color: #e6ffe6;"<?php } elseif ($row['filter'] == "S") { ?>style="background-color: #ccebff;"<?php }
-              ?>>
+              <tr <?php if ($row['filter'] == "F") { ?>style="background-color: #ffcccc;"<?php } elseif ($row['filter'] == "N") { ?>style="background-color: #e6ffe6;"<?php } elseif ($row['filter'] == "S") { ?>style="background-color: #ccebff;"<?php } ?>>
                 <td><?php echo $row['time']; ?> Uhr</td>
                 <td><?php echo $row['gleis']; ?></td>
                 <td><?php echo $row['elevator']; ?></td>
