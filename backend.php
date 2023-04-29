@@ -105,21 +105,35 @@ function getStationDetails($evaNo, $json) {
     return $stationDetail;
 }
 function checkElevatorState($evaNo, $gleisnummer) {
-    $gleisnummer_bereinigt =intval($gleisnummer);
+    // Bereinige die Gleisnummer und speichere sie in einer Variablen.
+    $gleisnummer_bereinigt = intval($gleisnummer);
+    
+    // Hole die Liste der Einrichtungen im Bahnhof.
     $facilities = json_decode(getFaSta($evaNo), true);
-    if (!(getStationDetails($evaNo, 'errNo')) == '404'){
-    foreach($facilities['facilities'] as $facility) {
-        $description = $facility['description'];
-        $state = $facility['state'];
-        if($facility['type'] === 'ELEVATOR') {
-            if(strpos($description, 'Gleis ' . $gleisnummer_bereinigt) !== false && $state === 'ACTIVE') {
-                return true;
-            }
-            else if(strpos($description, 'Gleis ' . ($gleisnummer_bereinigt-1) . '/' . $gleisnummer_bereinigt) !== false && $state === 'ACTIVE') {
-                return true;
+    
+    // Überprüfe, ob der Bahnhof existiert.
+    if (!(getStationDetails($evaNo, 'errNo')) == '404') {
+        // Durchlaufe alle Einrichtungen im Bahnhof.
+        foreach($facilities['facilities'] as $facility) {
+            // Speichere die Beschreibung und den Zustand der Einrichtung in Variablen.
+            $description = $facility['description'] ?? false;
+            $state = $facility['state'];
+            
+            // Überprüfe, ob die Einrichtung ein Aufzug ist.
+            if($facility['type'] === 'ELEVATOR') {
+                if(preg_match("/Gleis\s{$gleisnummer_bereinigt}(\s|$)/", $description, $matches) && $state === 'ACTIVE') {
+                    return true;
+                }
+                else if(preg_match("/Gleis\s\d+\s?\/\s?{$gleisnummer_bereinigt}(\s|$)/", $description, $matches) && $state === 'ACTIVE') {
+                    return true;
+                }
+                else if(preg_match("/Gleis\s{$gleisnummer_bereinigt}\s?\/\s?\d+(\s|$)/", $description, $matches) && $state === 'ACTIVE') {
+                    return true;
+                }
             }
         }
-    }}
+    }
+    // Gebe false zurück, wenn der Aufzug nicht gefunden wurde.
     return false;
 }
 #if (isset($_GET['evaNo']) && isset($_GET['date']) && isset($_GET['hour']) && isset($_GET['mode'])) {
