@@ -1,6 +1,7 @@
 <?php 
 //Backend laden
 require 'backend.php';
+date_default_timezone_set('Europe/Berlin');
 ?>
 <!DOCTYPE html>
 <html>
@@ -9,15 +10,14 @@ require 'backend.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Bootstrap CSS bootstrap-dark -->
-    <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1/dist/css/bootstrap-dark.min.css" rel="stylesheet" /> -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
     <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- Popper JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <!-- Latest compiled JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Aktuelles Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    <!-- Leaflet Openstreetmap -->
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
     <script type="module">
@@ -28,6 +28,13 @@ require 'backend.php';
         fullWidth: true	
       };
       new Autocomplete(document.getElementById("bahnhof"), opts);
+    </script>
+    <script>
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.setAttribute('data-bs-theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
+      }
     </script>
 </head>
 <body>
@@ -48,9 +55,7 @@ require 'backend.php';
                   data-live-server="true"
                   data-value-field="evaNo"
                   data-label-field="name"
-                  data-fetch-options='{"headers": {"X-My-Header": "test"}}'
-                  data-server-params='{"related":"related_field"}'
-                  placeholder="Type something"
+                  placeholder="Bahnhof eingeben"
                   required
                 />
             </div>
@@ -109,15 +114,10 @@ require 'backend.php';
         
         if (isset($_GET['bahnhof']) && isset($_GET['date']) && isset($_GET['hour'])&& isset($_GET['mode'])) {
             //Lese Werte aus dem Form
-            #$evaNo = filter_input(INPUT_GET, 'evaNo', FILTER_VALIDATE_INT);
             $date = filter_input(INPUT_GET, 'date', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{4}-\d{2}-\d{2}$/")));
-            #$hour = filter_input(INPUT_GET, 'hour', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{2}:\d{2}$/")));
             $mode = isset($_GET['mode']) && ($_GET['mode'] === 'ar' || $_GET['mode'] === 'dp') ? $_GET['mode'] : 'ar';
-            
             $evaNo = (searchStation($_GET['bahnhof']))==[] ?  null : json_decode(searchStation($_GET['bahnhof']), true)[0]['evaNo'];
-            #$date = $_GET['date'];
-            $hour = $_GET['hour'];
-            #$mode = $_GET['mode'];
+            $hour = filter_input(INPUT_GET, 'hour', FILTER_VALIDATE_INT);
             //Auswahl der Tabellenüberschrift
             if ($mode == "ar") {
                 $th_1 = "Startbahnhof";
@@ -150,8 +150,7 @@ require 'backend.php';
         <div id="mapid" class="col-md-4">
         <script>
         // OpenStreetMap-Karte erstellen
-        var mymap = L.map('mapid').setView([<?php echo getStationDetails($evaNo, 'result.0.evaNumbers.0.geographicCoordinates.coordinates.1') ?>, <?php echo getStationDetails($evaNo, 'result.0.evaNumbers.0.geographicCoordinates.coordinates.0') ?>], 13);       
-
+        var mymap = L.map('mapid').setView([<?php echo getStationDetails($evaNo, 'result.0.evaNumbers.0.geographicCoordinates.coordinates.1') ?>, <?php echo getStationDetails($evaNo, 'result.0.evaNumbers.0.geographicCoordinates.coordinates.0') ?>], 13);
         // Tile-Layer von OpenStreetMap hinzufügen
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
@@ -161,7 +160,6 @@ require 'backend.php';
             tileSize: 512,
             zoomOffset: -1
         }).addTo(mymap);        
-
         // Marker hinzufügen
         L.marker([<?php echo getStationDetails($evaNo, 'result.0.evaNumbers.0.geographicCoordinates.coordinates.1') ?>, <?php echo getStationDetails($evaNo, 'result.0.evaNumbers.0.geographicCoordinates.coordinates.0') ?>]).addTo(mymap);
         </script>
@@ -185,7 +183,7 @@ require 'backend.php';
           </thead>
           <tbody>
             <?php foreach (getTimeTable($evaNo, $date, $hour, $mode) as $row) { ?>
-              <tr <?php if ($row['filter'] == "F") { ?>style="background-color: #ffcccc;"<?php } elseif ($row['filter'] == "N") { ?>style="background-color: #e6ffe6;"<?php } elseif ($row['filter'] == "S") { ?>style="background-color: #ccebff;"<?php } ?>>
+              <tr <?php if ($row['filter'] == "F") { ?>style="background-color: #ffcccc; color: #333;" <?php } elseif ($row['filter'] == "N") { ?>style="background-color: #e6ffe6; color: #333;"<?php } elseif ($row['filter'] == "S") { ?>style="background-color: #ccebff; color: #333;"<?php } ?>>
                 <td><?php echo $row['time']; ?> Uhr</td>
                 <td><?php echo $row['gleis']; ?></td>
                 <td><?php if ($row['elevator'] == "TRUE") { ?>
