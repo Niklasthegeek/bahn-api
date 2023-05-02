@@ -138,54 +138,27 @@ date_default_timezone_set('Europe/Berlin');
                 </tr>
                 <tr>
                   <td>Öffnungszeiten:</td>
-                  <td><?php echo isset($evaNo)&&!empty(getStationDetails($evaNo, 'result.0.DBinformation.availability.'. strtolower(getDoW($date)) . '.fromTime')) ? getStationDetails($evaNo, 'result.0.DBinformation.availability.'. strtolower(getDoW($date)) . '.fromTime') . " Uhr bis " . getStationDetails($evaNo, 'result.0.DBinformation.availability.'. strtolower(getDoW($date)) . '.toTime') . " Uhr": 'Information nicht verfügbar'; ?></td>
+                  <td><?php echo isset($evaNo)&&!empty(getStationDetails($evaNo, 'result.0.DBinformation.availability.'. strtolower(getDoW($date)) . '.fromTime')) ? getStationDetails($evaNo, 'result.0.DBinformation.availability.'. strtolower(getDoW($date)) . '.fromTime') . " Uhr bis " . getStationDetails($evaNo, 'result.0.DBinformation.availability.'. strtolower(getDoW($date)) . '.toTime') . " Uhr": 'Information nicht verfügbar'; ?>
+                </td>
                 </tr>
                 <tr>
                   <td>Wifi:</td>
                   <td><?php // Zustand der Station und dann Zustand von Wifi prüfen
-                    if (isset($evaNo) && !empty(getStationDetails($evaNo, 'result.0.name'))){ if(getStationDetails($evaNo, 'result.0.hasWiFi') == "true") { ?>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-square-fill" viewBox="0 0 16 16">
-                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                          <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 0 1 .02-.022z"/>
-                        </svg>
-                      <?php } else{ ?>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
-                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                          <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                      <?php }} else echo 'Information nicht verfügbar'; ?>
+                    if (isset($evaNo) && !empty(getStationDetails($evaNo, 'result.0.name'))){ if(getStationDetails($evaNo, 'result.0.hasWiFi') == "true") { echo printchecksvg("check");} else{ echo printchecksvg("cross"); }} else echo 'Information nicht verfügbar'; ?>
                   </td>
                 </tr>
                 <tr>
                   <td>Parkplätze:</td>
                   <td><?php // Zustand der Station und dann Zustand von parking prüfen
-                    if (isset($evaNo) && !empty(getStationDetails($evaNo, 'result.0.name'))){ if(getStationDetails($evaNo, 'result.0.hasParking') == "true") { ?>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-square-fill" viewBox="0 0 16 16">
-                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                          <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 0 1 .02-.022z"/>
-                        </svg>
-                      <?php } else{ ?>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
-                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                          <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                      <?php }} else echo 'Information nicht verfügbar'; ?>
+                    if (isset($evaNo) && !empty(getStationDetails($evaNo, 'result.0.name'))){ if(getStationDetails($evaNo, 'result.0.hasParking') == "true") { echo printchecksvg("check");} else{ echo printchecksvg("cross"); }} else echo 'Information nicht verfügbar'; ?>
+                  </td>
                   </td>
                 </tr>
                 <tr>
                   <td>Autovermietung:</td>
                   <td><?php // Zustand der Station und dann Zustand von car rental prüfen
-                    if (isset($evaNo) && !empty(getStationDetails($evaNo, 'result.0.name'))){ if(getStationDetails($evaNo, 'result.0.hasCarRental') == "true") { ?>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-square-fill" viewBox="0 0 16 16">
-                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                          <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 0 1 .02-.022z"/>
-                        </svg>
-                      <?php } else{ ?>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
-                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                          <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
-                      <?php }} else echo 'Information nicht verfügbar'; ?>
+                    if (isset($evaNo) && !empty(getStationDetails($evaNo, 'result.0.name'))){ if(getStationDetails($evaNo, 'result.0.hasCarRental') == "true") { echo printchecksvg("check");} else{ echo printchecksvg("cross"); }} else echo 'Information nicht verfügbar'; ?>
+                    </td>
                   </td>
                 </tr>
               </tbody>
@@ -234,17 +207,7 @@ date_default_timezone_set('Europe/Berlin');
               <tr <?php if ($row['filter'] == "F") { ?>style="background-color: #ffcccc; color: #333;" <?php } elseif ($row['filter'] == "N") { ?>style="background-color: #e6ffe6; color: #333;"<?php } elseif ($row['filter'] == "S") { ?>style="background-color: #ccebff; color: #333;"<?php } ?>>
                 <td><?php echo $row['time']; ?> Uhr</td>
                 <td><?php echo $row['gleis']; ?></td>
-                <td><?php if ($row['elevator'] == "TRUE") { ?>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-square-fill" viewBox="0 0 16 16">
-                      <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                      <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 0 1 .02-.022z"/>
-                    </svg>
-                  <?php } elseif($row['elevator'] == "FALSE"){ ?>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
-                      <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-                      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                    </svg>
-                  <?php } ?></td>
+                <td><?php if ($row['elevator'] == "TRUE") { echo printchecksvg("check"); } elseif($row['elevator'] == "FALSE"){ echo printchecksvg("cross"); } ?></td>
                 <td><?php echo $row['startbahnhof'];?></td>
                 <td><?php echo $row['zielbahnhof']; ?></td>
                 <td><?php echo $row['category']; ?></td>
