@@ -256,7 +256,7 @@ date_default_timezone_set('Europe/Berlin');
         </table>
         <?php
         } else{ ?>
-        <div class="text-warning">
+        <div class="p-3 text-info-emphasis bg-info-subtle border border-info-subtle rounded-3">
         <?php echo "Die Deutsche Bahn stellt leider keine Timetable Informationen länger als 12 Stungen in Vergangenheit oder Zukunft zur Verfügung!";}?>
         </div>
         <?php
