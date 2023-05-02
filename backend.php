@@ -191,8 +191,7 @@ function getStationList(){
             'name' =>  json_decode(json_encode($name), true), //json enc dec dient dem korrekten formatieren der daten in UTF-8 aufgrund Probleme mit Umlauten
             'evaNo' => json_decode(json_encode($evaNo), true)
         ];
-    } 
-        
+    }        
     return $data;
 }
 // Funktion searchStation durchsucht die Stationsliste von der Funktion getStationlist nach dem Übergabewert
