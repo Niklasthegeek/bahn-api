@@ -66,7 +66,7 @@ date_default_timezone_set('Europe/Berlin');
             </div>
 
             <div class="form-group col-12">
-                <label for="hour">Stunde:</label>
+                <label for="hour">Stunde(Format 00 bis 23):</label>
                 <input type="text" class="form-control" id="hour" name="hour"
                     value="<?php echo isset($_GET['hour']) ? $_GET['hour'] : ''; ?>" required>
             </div>
@@ -117,21 +117,14 @@ date_default_timezone_set('Europe/Berlin');
             $date = filter_input(INPUT_GET, 'date', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{4}-\d{2}-\d{2}$/")));
             $mode = isset($_GET['mode']) && ($_GET['mode'] === 'ar' || $_GET['mode'] === 'dp') ? $_GET['mode'] : 'ar';
             $evaNo = (searchStation($_GET['bahnhof']))==[] ?  null : json_decode(searchStation($_GET['bahnhof']), true)[0]['evaNo'];
-            $hour = filter_input(INPUT_GET, 'hour', FILTER_VALIDATE_INT);
-            //Auswahl der Tabellenüberschrift
-            if ($mode == "ar") {
-                $th_1 = "Startbahnhof";
-                $th_2 = "Letzter Halt";
-            } else {
-                $th_1 = "Nächster Halt";
-                $th_2 = "Zielbahnhof";
-            }
+            #$hour = filter_input(INPUT_GET, 'hour', FILTER_VALIDATE_INT);
+            $hour = $_GET['hour'];
         ?>
         <div >
-            <table class="table">
+            <table class="table table-sm">
               <tbody>
                 <tr>
-                  <td>StationNumber:</td>
+                  <td>Stationsnummer:</td>
                   <td><?php //Wenn evaNo gesetzt und getStationDetails($evaNo, 'result.0.name') nicht leer ist gebe getStationDetails($evaNo, 'result.0.name') aus, sonst gebe 'Information nicht verfügbar' aus
                   echo isset($evaNo)&&!empty(getStationDetails($evaNo, 'result.0.number')) ? getStationDetails($evaNo, 'result.0.number') : 'Information nicht verfügbar';?>
                 </tr>
@@ -140,14 +133,67 @@ date_default_timezone_set('Europe/Berlin');
                   <td><?php echo isset($evaNo)&&!empty(getStationDetails($evaNo, 'result.0.name')) ? getStationDetails($evaNo, 'result.0.name') : 'Information nicht verfügbar'; ?></td>
                 </tr>
                 <tr>
-                  <td>Aufgabenträger:</td>
+                  <td>Betreiber:</td>
                   <td><?php echo isset($evaNo)&&!empty(getStationDetails($evaNo, 'result.0.aufgabentraeger.name')) ? getStationDetails($evaNo, 'result.0.aufgabentraeger.name') : 'Information nicht verfügbar'; ?></td>
+                </tr>
+                <tr>
+                  <td>Öffnungszeiten:</td>
+                  <td><?php echo isset($evaNo)&&!empty(getStationDetails($evaNo, 'result.0.DBinformation.availability.'. strtolower(getDoW($date)) . '.fromTime')) ? getStationDetails($evaNo, 'result.0.DBinformation.availability.'. strtolower(getDoW($date)) . '.fromTime') . " Uhr bis " . getStationDetails($evaNo, 'result.0.DBinformation.availability.'. strtolower(getDoW($date)) . '.toTime') . " Uhr": 'Information nicht verfügbar'; ?></td>
+                </tr>
+                <tr>
+                  <td>Wifi:</td>
+                  <td><?php // Zustand der Station und dann Zustand von Wifi prüfen
+                    if (isset($evaNo) && !empty(getStationDetails($evaNo, 'result.0.name'))){ if(getStationDetails($evaNo, 'result.0.hasWiFi') == "true") { ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-square-fill" viewBox="0 0 16 16">
+                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                          <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 0 1 .02-.022z"/>
+                        </svg>
+                      <?php } else{ ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
+                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                          <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                      <?php }} else echo 'Information nicht verfügbar'; ?>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Parkplätze:</td>
+                  <td><?php // Zustand der Station und dann Zustand von parking prüfen
+                    if (isset($evaNo) && !empty(getStationDetails($evaNo, 'result.0.name'))){ if(getStationDetails($evaNo, 'result.0.hasParking') == "true") { ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-square-fill" viewBox="0 0 16 16">
+                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                          <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 0 1 .02-.022z"/>
+                        </svg>
+                      <?php } else{ ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
+                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                          <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                      <?php }} else echo 'Information nicht verfügbar'; ?>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Autovermietung:</td>
+                  <td><?php // Zustand der Station und dann Zustand von car rental prüfen
+                    if (isset($evaNo) && !empty(getStationDetails($evaNo, 'result.0.name'))){ if(getStationDetails($evaNo, 'result.0.hasCarRental') == "true") { ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-square-fill" viewBox="0 0 16 16">
+                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                          <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 0 1 .02-.022z"/>
+                        </svg>
+                      <?php } else{ ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
+                          <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                          <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                      <?php }} else echo 'Information nicht verfügbar'; ?>
+                  </td>
                 </tr>
               </tbody>
             </table>        
         </div>
         </div>
         <div id="mapid" class="col-md-4">
+        <?php if (isset($evaNo) && !empty(getStationDetails($evaNo, 'result.0.name'))){ // Prüfen ob für die erzeugung der karte benötiget werte vorhanden sind?>
         <script>
         // OpenStreetMap-Karte erstellen
         var mymap = L.map('mapid').setView([<?php echo getStationDetails($evaNo, 'result.0.evaNumbers.0.geographicCoordinates.coordinates.1') ?>, <?php echo getStationDetails($evaNo, 'result.0.evaNumbers.0.geographicCoordinates.coordinates.0') ?>], 13);
@@ -163,19 +209,21 @@ date_default_timezone_set('Europe/Berlin');
         // Marker hinzufügen
         L.marker([<?php echo getStationDetails($evaNo, 'result.0.evaNumbers.0.geographicCoordinates.coordinates.1') ?>, <?php echo getStationDetails($evaNo, 'result.0.evaNumbers.0.geographicCoordinates.coordinates.0') ?>]).addTo(mymap);
         </script>
+        <?php } ?>
         </div>
         </div>
         <br>
         <div id="timetable-results"><br>
-
+        <?php 
+        if(!empty(getTimeTable($evaNo, $date, $hour, $mode))){ ?>
         <table class="table table-sm table-bordered">
           <thead>
             <tr>
               <th>Zeit</th>
               <th>Gleis</th>
               <th>Aufzug</th>
-              <th><?php echo $th_1; ?></th>
-              <th><?php echo $th_2; ?></th>
+              <th><?php echo "Startbahnhof"; ?></th>
+              <th><?php echo "Zielbahnhof"; ?></th>
               <th>Zugnummer</th>
               <th>ZugID</th>
               <th>Über</th>
@@ -197,8 +245,8 @@ date_default_timezone_set('Europe/Berlin');
                       <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
                     </svg>
                   <?php } ?></td>
-                <td><?php echo $row['bhf_0']; ?></td>
-                <td><?php echo $row['bhf_end']; ?></td>
+                <td><?php echo $row['startbahnhof'];?></td>
+                <td><?php echo $row['zielbahnhof']; ?></td>
                 <td><?php echo $row['category']; ?></td>
                 <td><?php echo $row['linie']; ?></td>
                 <td><?php echo $row['pfad']; ?></td>
@@ -206,6 +254,11 @@ date_default_timezone_set('Europe/Berlin');
             <?php } ?>
           </tbody>
         </table>
+        <?php
+        } else{ ?>
+        <div class="text-warning">
+        <?php echo "Die Deutsche Bahn stellt leider keine Timetable Informationen länger als 12 Stungen in Vergangenheit oder Zukunft zur Verfügung!";}?>
+        </div>
         <?php
         }
         ?>

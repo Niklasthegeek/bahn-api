@@ -1,33 +1,33 @@
 <?php
 function getFromCache($cacheKey, $cacheExpiration) {
-    // Build cache file path from cache key
+    // Baue Cache Datei Namen
     $cacheDir = "cache/";
     $cacheFile = $cacheDir . $cacheKey;
     
     $files = glob($cacheDir . "*");
-    // Loop through all files
+    // Alle Dateien durchlaufen
     foreach ($files as $file) {
-        // Check if file is older than cache expiration time
+        // Prüfe ob Datei zu alt ist, wenn ja cleanup
         if (time() - filemtime($file) >= 604800) {
-            // Delete file
+            // Lösche Datei
             unlink($file);
         }
     }
-    // If cache file exists and is not expired, return cached data
+    // Wenn Cachedatei vorhanden ist und nicht abgelaufen ist gebe Dateiinhalt zurück
     if (file_exists($cacheFile) && time() - filemtime($cacheFile) < $cacheExpiration) {
         return file_get_contents($cacheFile);
     }
 
-    // Otherwise, return false
+    // Wenn nicht gebe false zurück
     return false;
 }
 
 function saveToCache($cacheKey, $data) {
-    // Build cache file path from cache key
+    // Baue Cache Datei Namen
     $cacheDir = "cache/";
     $cacheFile = $cacheDir . $cacheKey;
 
-    // Save data to cache file
+    // Speichere Daten in Cachedatei
     file_put_contents($cacheFile, $data);
 }
 //Funktion curlbahn gibt mit den Übergabewerten $url und $accept_header aus was die Bahn API bereitstellt
@@ -37,8 +37,6 @@ function curlbahn($url, $accept_header) {
     $apiKey = explode('=', trim(fgets($file)))[1];
     $clientID = explode('=', trim(fgets($file)))[1];
     fclose($file);
-    #echo "API-Key: " . $apiKey;    
-    #echo "ClientID: " . $clientID;    
     $curl = curl_init();
     curl_setopt_array($curl, [
         CURLOPT_URL => $url,
@@ -59,10 +57,16 @@ function curlbahn($url, $accept_header) {
     curl_close($curl);
     return $response;
 }
-// Funktion getStationDetails gibt gewünschte Werte aus der station Data API der DB aus
+//getYMD gibt das von der bahn gewünschte Datumsformat aus
 function getYMD($date){
     $date_obj = DateTime::createFromFormat('Y-m-d', $date); // Erstellt ein DateTime-Objekt aus dem String
     $new_date_str = $date_obj->format('ymd'); // Formatiert das DateTime-Objekt in das gewünschte Format
+    return $new_date_str;
+}
+//getDay of Week konvertiert ein datum in einen Wochentag
+function getDoW($date){
+    $date_obj = DateTime::createFromFormat('Y-m-d', $date); // Erstellt ein DateTime-Objekt aus dem String
+    $new_date_str = $date_obj->format('l'); // Formatiert das DateTime-Objekt in das gewünschte Format
     return $new_date_str;
 }
 function getviewselect() {
@@ -83,13 +87,13 @@ function getviewselect() {
     ];
     return $data;
 }
-
+// Funktion getStationDetails gibt gewünschte Werte aus der station Data API der DB aus
 function getStationDetails($evaNo, $json) {
     $cacheExpiration = 600;
     $url = "https://apis.deutschebahn.com/db-api-marketplace/apis/station-data/v2/stations?eva=" . $evaNo;
-    // Build cache key from URL
+    // Baue Cache Key
     $cacheKey = "StaDa-". $evaNo;
-    // Try to get data from cache
+    // Versuche Daten aus Cache zu lesen
     $cachedData = getFromCache($cacheKey, $cacheExpiration);
 
     if ($cachedData !== false) {
@@ -136,43 +140,37 @@ function checkElevatorState($evaNo, $gleisnummer) {
     // Gebe false zurück, wenn der Aufzug nicht gefunden wurde.
     return false;
 }
-#if (isset($_GET['evaNo']) && isset($_GET['date']) && isset($_GET['hour']) && isset($_GET['mode'])) {
-#    //Lese Werte aus dem Form
-#    $evaNo = filter_input(INPUT_GET, 'evaNo', FILTER_VALIDATE_INT);
-#    $date = filter_input(INPUT_GET, 'date', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{4}-\d{2}-\d{2}$/")));
-#    $hour = filter_input(INPUT_GET, 'hour', FILTER_VALIDATE_REGEXP, array("options"=>array("regexp"=>"/^\d{2}:\d{2}$/")));
-#    $mode = isset($_GET['mode']) && ($_GET['mode'] === 'ar' || $_GET['mode'] === 'dp') ? $_GET['mode'] : 'ar';
-#}
-
+// getFaSta holt die daten der FaSta API (Fahrstühle)
 function getFaSta($evaNo) {
     $cacheExpiration = 600;
     $stationnumber = getStationDetails($evaNo, 'result.0.number');
     $url = "https://apis.deutschebahn.com/db-api-marketplace/apis/fasta/v2/stations/" . $stationnumber;
 
-    // Build cache key from URL
+    // Baue Cache Key
     $cacheKey = "FaSta-".$evaNo;
 
-    // Try to get data from cache
+    // Versuche Daten aus Cache zu lesen
     $cachedData = getFromCache($cacheKey, $cacheExpiration);
 
     if ($cachedData !== false) {
-        // Return cached data if available
+        // gebe wenn verfügbar cachedaten zurück
         return $cachedData;
     }
 
-    // Otherwise, make API request and save response to cache
+    // wenn kein cache verfügbar ist hole daten aus API und speicher in den Cache
     $data = curlbahn($url, "application/json");
     saveToCache($cacheKey, $data);
 
     return $data;
 }
+// getStationList extrahiert alle Bahnhöfe(stations) und gibt diese als Array zurück
 function getStationList(){
     $url = "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1/station/*";
     //Caching
     $cacheExpiration = 86400; // 1 Tag, da nicht zu erwarten ist, dass häufig neue Stations hinzu kommen
-    // Build cache key from URL
+    // Baue Cache Key
     $cacheKey = "StationList";
-    // Try to get data from cache
+    // Versuche Daten aus Cache zu lesen
     $cachedData = getFromCache($cacheKey, $cacheExpiration); 
     if ($cachedData !== false) {
         $sourcexml = $cachedData;
@@ -190,14 +188,14 @@ function getStationList(){
         $evaNo = $element->attributes()->eva;
          //Array mit Daten befüllen
         $data[] = [
-            'name' =>  json_decode(json_encode($name), true),
+            'name' =>  json_decode(json_encode($name), true), //json enc dec dient dem korrekten formatieren der daten in UTF-8 aufgrund Probleme mit Umlauten
             'evaNo' => json_decode(json_encode($evaNo), true)
         ];
     } 
         
     return $data;
 }
-
+// Funktion searchStation durchsucht die Stationsliste von der Funktion getStationlist nach dem Übergabewert
 function searchStation($searchTerm) {
     $stations = getStationList();
     $filteredStations = array_filter($stations, function($station) use ($searchTerm) {
@@ -212,17 +210,15 @@ function searchStation($searchTerm) {
     }
     return json_encode($result, JSON_UNESCAPED_UNICODE);
 }
-
-
-
+// Die Funktion getTimeTable sammelt alle in der Anzeigetabelle gewünschten Informationen und gibt diese als Array zurück
 function getTimeTable($evaNo, $date, $hour, $mode){
     $dateNew = getYMD($date);     
     $url = "https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1/plan/" . $evaNo . "/" . $dateNew . "/" . $hour;
     // Cacheing
     $cacheExpiration = 600;
-    // Build cache key from URL
+    // Baue Cache Key
     $cacheKey = "Timetable-". $evaNo . "-" . $dateNew .  "-" . $hour;
-    // Try to get data from cache
+    // Versuche Daten aus Cache zu lesen
     $cachedData = getFromCache($cacheKey, $cacheExpiration); 
     if ($cachedData !== false) {
         $sourcexml = $cachedData;
@@ -236,6 +232,8 @@ function getTimeTable($evaNo, $date, $hour, $mode){
         $view3 = $views[2];
         $view4 = $views[3];
     }
+    // Wenn xml leer dann beende die funktion
+    if(empty($sourcexml)){return;}
     // XML-String in ein SimpleXMLElement-Objekt umwandeln
     $xml = new SimpleXMLElement($sourcexml);
     // Erstelle ein leeres Array, um die Daten zu speichern
@@ -246,8 +244,8 @@ function getTimeTable($evaNo, $date, $hour, $mode){
             $ff = $element->tl->attributes()->f; // Liest den Wert des Attributs "f" des Attributs "tl" des aktuellen Elements und weist ihn der Variablen $ff zu
             $abfahrtszeit = $element->$mode->attributes()->pt; // Liest den Wert des Attributs "pt" des Attributs $mode des aktuellen Elements und weist ihn der Variablen $abfahrtszeit zu
             $bhf = explode("|", $element->$mode->attributes()->ppth); // Liest den Wert des Attributs "ppth" des Attributs $mode des aktuellen Elements, splittet ihn anhand des Trennzeichens "|" und weist ihn der Variablen $ziel zu
-            $bhf_0 = $bhf[0]; // Nimmt das erste Element des Arrays $ziel und weist es wieder der Variable $bhf_0 zu
-            $bhf_end = end($bhf); // Nimmt das letzte Element des Arrays $ziel und weist es wieder der Variable $bhf_end zu
+            //$bhf_0 = $bhf[0]; // Nimmt das erste Element des Arrays $ziel und weist es wieder der Variable $bhf_0 zu
+            //$bhf_end = end($bhf); // Nimmt das letzte Element des Arrays $ziel und weist es wieder der Variable $bhf_end zu
             $hour = substr($abfahrtszeit, 6, 2); // Extrahiert aus dem Wert von $abfahrtszeit die Stundenzahl und weist sie der Variablen $hour zu
             $minute = substr($abfahrtszeit, 8, 2); // Extrahiert aus dem Wert von $abfahrtszeit die Minutenzahl und weist sie der Variablen $minute zu
             $time = $hour . ":" . $minute; // Setzt die Werte von $hour und $minute zu einem Zeitstempel zusammen und weist ihn der Variablen $time zu
@@ -256,6 +254,8 @@ function getTimeTable($evaNo, $date, $hour, $mode){
             $linie = $element->tl->attributes()->n; // Liest den Wert des Attributs "n" des Attributs "tl" des aktuellen Elements und weist ihn der Variablen $linie zu
             $pfad = $element->$mode->attributes()->ppth; // Liest den Wert des Attributs "ppth" des Attributs $mode des aktuellen Elements und weist ihn der Variablen $pfad zu
             $pfad = implode(" -> ",$bhf); // Liest den Wert des Attributs "ppth" des Attributs $mode des aktuellen Elements und weist ihn der Variablen $pfad zu
+            $startbahnhof = isset($element->ar['ppth']) ? explode("|", $element->ar['ppth'])[0] : $xml->attributes()['station'];
+            $zielbahnhof = isset($element->dp['ppth']) ? explode("|", $element->dp['ppth'])[count(explode("|",$element->dp['ppth'])) - 1] : $xml->attributes()['station'];
             if (!empty($element->$mode->attributes()->l)) { // Prüft, ob das Attribut $mode des aktuellen Elements ein Attribut "l" hat und ob der Wert nicht leer ist
                 $zugn = (!empty($element->ar->attributes()->ppth) and !empty($element->$mode->attributes()->l)) ? $element->ar->attributes()->l : $element->dp->attributes()->l; // Weist der Variablen $zugn den Wert des Attributs "l" des Attributs "ar" des aktuellen Elements zu, wenn vorhanden, andernfalls wird der Wert des Attributs "l" des Attributs "dp" des aktuellen Elements zugewiesen
             } else {
@@ -273,8 +273,10 @@ function getTimeTable($evaNo, $date, $hour, $mode){
                     'time' => $time,
                     'gleis' => $gleis,
                     'elevator' => $elevator,
-                    'bhf_0' => $bhf_0,
-                    'bhf_end' => $bhf_end,
+                    //'bhf_0' => $bhf_0,
+                    //'bhf_end' => $bhf_end,
+                    'startbahnhof' => $startbahnhof,
+                    'zielbahnhof' => $zielbahnhof,
                     'category' => $category . $zugn,
                     'linie' => $category . $linie,
                     'pfad' => $pfad,
