@@ -66,9 +66,9 @@ date_default_timezone_set('Europe/Berlin');
             </div>
 
             <div class="form-group col-12">
-                <label for="hour">Stunde(Format 00 bis 23):</label>
+                <label for="hour">Stunde:</label>
                 <input type="time" class="form-control" id="hour" name="hour"
-                    value="<?php echo isset($_GET['hour']) ? substr($_GET['hour'], 0, strpos($_GET['hour'], ":")) . ":00" : ''; ?>" required>
+                    value="<?php echo isset($_GET['hour']) ? substr($_GET['hour'], 0, strpos($_GET['hour'], ":")) . ":00" : date("H") . ":00"; ?>" required>
             </div>
             <div class="form-check-inline">
                 <input type="radio" class="form-check-input" id="mode-ar" name="mode" value="ar" <?php if (isset($_GET['mode'])){if ($_GET['mode'] == 'ar')
@@ -220,7 +220,8 @@ date_default_timezone_set('Europe/Berlin');
         <?php
         } else{ ?>
         <div class="p-3 text-info-emphasis bg-info-subtle border border-info-subtle rounded-3">
-        <?php echo "Die Deutsche Bahn stellt leider keine Timetable Informationen länger als 12 Stungen in Vergangenheit oder Zukunft zur Verfügung!";}?>
+          <?php echo "Bitte prüfen sie ihre Eingabe!"?><br>
+          <?php echo "Die Deutsche Bahn stellt leider keine Timetable Informationen länger als 12 Stungen in Vergangenheit oder Zukunft zur Verfügung!";}?>
         </div>
         <?php
         }
