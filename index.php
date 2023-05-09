@@ -67,8 +67,8 @@ date_default_timezone_set('Europe/Berlin');
 
             <div class="form-group col-12">
                 <label for="hour">Stunde(Format 00 bis 23):</label>
-                <input type="text" class="form-control" id="hour" name="hour"
-                    value="<?php echo isset($_GET['hour']) ? $_GET['hour'] : ''; ?>" required>
+                <input type="time" class="form-control" id="hour" name="hour"
+                    value="<?php echo isset($_GET['hour']) ? substr($_GET['hour'], 0, strpos($_GET['hour'], ":")) . ":00" : ''; ?>" required>
             </div>
             <div class="form-check-inline">
                 <input type="radio" class="form-check-input" id="mode-ar" name="mode" value="ar" <?php if (isset($_GET['mode'])){if ($_GET['mode'] == 'ar')
@@ -118,7 +118,7 @@ date_default_timezone_set('Europe/Berlin');
             $mode = isset($_GET['mode']) && ($_GET['mode'] === 'ar' || $_GET['mode'] === 'dp') ? $_GET['mode'] : 'ar';
             $evaNo = (searchStation($_GET['bahnhof']))==[] ?  null : json_decode(searchStation($_GET['bahnhof']), true)[0]['evaNo'];
             #$hour = filter_input(INPUT_GET, 'hour', FILTER_VALIDATE_INT);
-            $hour = $_GET['hour'];
+            $hour = substr($_GET['hour'], 0, strpos($_GET['hour'], ":"));
         ?>
         <div >
             <table class="table table-sm">
