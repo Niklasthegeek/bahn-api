@@ -83,19 +83,19 @@ date_default_timezone_set('Europe/Berlin');
             <br><br>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="zugart_fv" name="zugart_fv" value="yes" <?php if (isset($_GET['zugart_fv'])){if ($_GET['zugart_fv'] == 'yes'){echo "checked";}}  ?>>
-                <label class="form-check-label" for="zugart_fv">
+                <label class="form-check-label border subtle rounded" style="background-color: #ffcccc; color: #333;" for="zugart_fv">
                     Fernverkehr
                 </label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="zugart_nv" name="zugart_nv" value="yes" <?php if (isset($_GET['zugart_nv'])){if ($_GET['zugart_nv'] == 'yes'){echo "checked";}}  ?>>
-                <label class="form-check-label" for="zugart_nv">
+                <label class="form-check-label border subtle rounded" style="background-color: #e6ffe6; color: #333;" for="zugart_nv">
                     Nahverkehr
                 </label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="zugart_metro" name="zugart_metro" value="yes" <?php if (isset($_GET['zugart_metro'])){if ($_GET['zugart_metro'] == 'yes'){echo "checked";}}  ?>>
-                <label class="form-check-label" for="zugart_metro">
+                <label class="form-check-label border subtle rounded" style="background-color: #ccebff; color: #333;" for="zugart_metro">
                     Metro
                 </label>
             </div>
