@@ -1,7 +1,8 @@
 # bahn-api - Eine Implementation einer Infotafel für aktuelle An-/Abfahrten an einem Wunschbahnhof
 Ziel dieser Webapp ist die Bereitstellung einer Infotafel beruhend auf den Daten aus den DB APIs Timetable, StationData und FacilitiesStatus
 
-![image](https://github.com/Niklasthegeek/bahn-api/assets/77445745/c5e7bac6-ff9f-4332-819e-42e407551bd9)
+![image](https://github.com/Niklasthegeek/bahn-api/assets/77445745/9818b6c4-959c-4265-b5d1-dd6a0f2235a5)
+
 
 
 
